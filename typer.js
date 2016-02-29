@@ -16,14 +16,33 @@ var TYPER = function(){
 	this.word = null; // preagu arvamisel olev sõna
 	this.word_min_length = 3;
 	this.guessed_words = 0; // nö skoor
+  this.mistakes = 0;
+
+  this.routes = TYPER.routes;
+  this.current_route = null;
+  this.players = [];
 
 	//mängija objekt, hoiame nime ja skoori
-	this.player = {name: null, score: 0};
+	this.player = {name: null, score: 0, errors: 0};
 
 	this.init();
 };
 
 window.TYPER = TYPER;
+
+TYPER.routes = {
+  'game': {
+    'render': function(){
+      // käivitame siis kui lehte laeme
+      console.log('>>>>mang');
+    }
+  },
+  'highscore': {
+    'render': function(){
+      console.log('>>>>skoorid');
+    }
+  }
+};
 
 TYPER.prototype = {
 
@@ -32,6 +51,19 @@ TYPER.prototype = {
 
 		// küsime mänigja andmed
 		this.loadPlayerData();
+
+    //iseseisevtyy
+    if(!window.location.hash){
+      window.location.hash = 'game';
+    }
+    console.log(window.location.hash);
+    if(window.location.hash === '#game'){
+      document.getElementById("game").style.display = "block";
+      document.getElementById("highscore").style.display = "none";
+    }else{
+      document.getElementById("game").style.display = "none";
+      document.getElementById("highscore").style.display = "block";
+    }
 
 		// Lisame canvas elemendi ja contexti
 		this.canvas = document.getElementsByTagName('canvas')[0];
@@ -95,7 +127,7 @@ TYPER.prototype = {
 
 				//asendan massiivi
 				TYPER_ref.words = structureArrayByWordLength(words_from_file);
-				console.log(TYPER_ref.words);
+				//console.log(TYPER_ref.words);
 
 				// kõik sõnad olemas, alustame mänguga
 				TYPER_ref.start();
@@ -113,7 +145,7 @@ TYPER.prototype = {
 		//console.log(this.word);
 
         //joonista sõna
-		this.word.Draw();
+		this.word.Draw(this.guessed_words, this.mistakes);
 
 		// Kuulame klahvivajutusi
 		window.addEventListener('keypress', this.keyPressed.bind(this));
@@ -160,8 +192,15 @@ TYPER.prototype = {
 			}
 
 			//joonistan uuesti
-			this.word.Draw();
-		}
+			this.word.Draw(this.guessed_words, this.mistakes);
+		}else{
+
+      this.mistakes += 1;
+
+      this.player.errors = this.mistakes;
+
+      this.word.Draw(this.guessed_words, this.mistakes);
+    }
 
 	} // keypress end
 
@@ -180,7 +219,7 @@ function Word(word, canvas, ctx){
 }
 
 Word.prototype = {
-	Draw: function(){
+	Draw: function(score, errors){
 
 		//Tühjendame canvase
 		this.ctx.clearRect( 0, 0, this.canvas.width, this.canvas.height);
@@ -191,6 +230,16 @@ Word.prototype = {
 
 		// 	// Joonistame sõna, mis on järel / tekst, x, y
 		this.ctx.fillText(this.left, this.canvas.width/2, this.canvas.height/2);
+
+    //skoor
+    this.ctx.textAlign = 'left';
+    this.ctx.font = '40px Courier';
+    this.ctx.fillText("skoor: "+score, 50, 50);
+
+    //errorid
+    this.ctx.textAlign = 'left';
+    this.ctx.font = '40px Courier';
+    this.ctx.fillText("vigu: "+errors, 50, 900);
 	},
 
 	// Võtame sõnast esimese tähe maha
