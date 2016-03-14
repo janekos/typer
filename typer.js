@@ -95,6 +95,7 @@ TYPER.prototype = {
 		// Mänigja objektis muudame nime
 		this.player.name = p_name; // player =>>> {name:"Romil", score: 0}
         console.log(this.player);
+		this.players.push(this.player);
 	}, // loadPlayerData end
 
 	loadWords: function(){
@@ -200,11 +201,115 @@ TYPER.prototype = {
       this.player.errors = this.mistakes;
 
       this.word.Draw(this.guessed_words, this.mistakes);
+	  
+	  this.loadHighScore(this.guessed_words, this.mistakes);
     }
 
-	} // keypress end
+	}, // keypress end
+	
+	loadHighScore: function(score, error){
+		if(error>9){
+			alert("Mäng on läbi! Teie skoor on "+score+" punkti.");
+			
+			document.getElementById("game").style.display = "none";
+			document.getElementById("highscore").style.display = "block";
+			
+			this.addNewScore();
+			
+			this.loadData();
+		}
+	},
+	
+	loadData: function(){
+		
+		var xhttp = new XMLHttpRequest();
+
+          xhttp.onreadystatechange = function() {
+
+           if (xhttp.readyState == 4 && xhttp.status == 200) {
+             var result = JSON.parse(xhttp.responseText);
+             console.log(result);
+
+             TYPER.instance_.createListFromArray(result);
+             console.log('laadisin serverist');
+           }
+         };
+
+         xhttp.open("GET", "saveData.php", true);
+         xhttp.send();
+
+    },
+	   
+	createListFromArray: function(arrayOfObjects){
+
+       this.scores = arrayOfObjects;
+
+       //tekitan loendi htmli
+       this.scores.forEach(function(score1){
+         var new_score = new Score(score1.name, score1.score);
+
+         var li = new_score.createHtmlElement();
+         document.querySelector('.high_scores').appendChild(li);
+       });
+       //this.bindEvents();
+    },
+	
+	addNewScore: function(){
+       //console.log(event);
+       //salvestame purgi
+       var name = this.players[0].name;
+       var score = this.players[0].score;
+       
+       var new_score = new Score(name, score);
+       document.querySelector('.high_scores').appendChild(new_score.createHtmlElement());
+       //lisan purgi massiivi
+       //this.players.push(new_score);
+       console.log(JSON.stringify(this.scores));
+       localStorage.setItem('scores',JSON.stringify(this.scores));
+
+       //salvestan serverisse
+       var xhttp = new XMLHttpRequest();
+       xhttp.onreadystatechange = function() {
+       if (xhttp.readyState == 4 && xhttp.status == 200) {
+
+			console.log('salvestas serverisse');
+            var result =xhttp.responseText;
+            console.log(result);
+
+
+          }
+       };
+       console.log("saveData.php?name="+name+"&score="+score);
+       xhttp.open("GET", "saveData.php?name="+name+"&score="+score, true);
+       xhttp.send();
+     }
 
 };
+
+var Score = function(player, score){
+     this.player = player;
+     this.score = score;
+     console.log('created new score');
+   };
+
+Score.prototype = {
+     createHtmlElement: function(){
+
+       var li = document.createElement('li');
+
+       var span1 = document.createElement('span');
+       span1.className = 'content';
+
+       var content = document.createTextNode(this.player + ' | ' + this.score +'   ');
+       span1.appendChild(content);
+       //span1.appendChild(del);
+
+       li.appendChild(span1);
+
+       return li;
+
+     },
+   };
 
 
 // Sõna objekt
@@ -239,7 +344,7 @@ Word.prototype = {
     //errorid
     this.ctx.textAlign = 'left';
     this.ctx.font = '40px Courier';
-    this.ctx.fillText("vigu: "+errors, 50, 900);
+    this.ctx.fillText("vigu: "+errors, 50, 90);
 	},
 
 	// Võtame sõnast esimese tähe maha
