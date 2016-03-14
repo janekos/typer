@@ -249,25 +249,21 @@ TYPER.prototype = {
          var new_score = new Score(score1.name, score1.score);
 
          var li = new_score.createHtmlElement();
+		 
          document.querySelector('.high_scores').appendChild(li);
        });
-       //this.bindEvents();
+
     },
 	
 	addNewScore: function(){
-       //console.log(event);
-       //salvestame purgi
+
        var name = this.players[0].name;
        var score = this.players[0].score;
        
        var new_score = new Score(name, score);
-       document.querySelector('.high_scores').appendChild(new_score.createHtmlElement());
-       //lisan purgi massiivi
+       //document.querySelector('.high_scores').appendChild(new_score.createHtmlElement());
        //this.players.push(new_score);
-       console.log(JSON.stringify(this.scores));
-       localStorage.setItem('scores',JSON.stringify(this.scores));
 
-       //salvestan serverisse
        var xhttp = new XMLHttpRequest();
        xhttp.onreadystatechange = function() {
        if (xhttp.readyState == 4 && xhttp.status == 200) {
@@ -302,7 +298,6 @@ Score.prototype = {
 
        var content = document.createTextNode(this.player + ' | ' + this.score +'   ');
        span1.appendChild(content);
-       //span1.appendChild(del);
 
        li.appendChild(span1);
 

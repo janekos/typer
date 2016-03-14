@@ -1,1 +1,1 @@
-[{"name":"aylama","score":"1"},{"name":"vvbcvb","score":"7"},{"name":"fdgfg","score":"2"}]
+[{"name":"janek","score":"14"},{"name":"tere","score":"3"},{"name":"janek","score":"3"},{"name":"aylmao","score":"1"},{"name":"aylmao","score":"1"},{"name":"romil","score":"2"}]
